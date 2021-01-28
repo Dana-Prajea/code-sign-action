@@ -88,12 +88,12 @@ async function signWithSigntool(fileName: string) {
 async function trySignFile(fileName: string) {
     console.log(`Signing ${fileName}.`);
     const extension = path.extname(fileName);
-    for (let i=0; i< 10; i++) {
-        await sleep(i);
+    for (let i=10; i< 20; i++) {
         if (signtoolFileExtensions.includes(extension)) {
             if (await signWithSigntool(fileName))
                 return;
         }
+        await sleep(i);
     }
     throw `Failed to sign '${fileName}'.`;
 }
