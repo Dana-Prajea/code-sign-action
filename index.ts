@@ -8,7 +8,7 @@ import { env } from 'process';
 const asyncExec = util.promisify(exec);
 const certificateFileName = env['TEMP'] + '\\certificate.pfx';
 
-const timestampUrl = 'http://timestamp.globalsign.com/scripts/timstamp.dll';
+const timestampUrl = 'http://timestamp.digicert.com';
 const signtool = 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe';
 
 const signtoolFileExtensions = [
@@ -88,7 +88,7 @@ async function signWithSigntool(fileName: string) {
 async function trySignFile(fileName: string) {
     console.log(`Signing ${fileName}.`);
     const extension = path.extname(fileName);
-    for (let i=10; i< 20; i++) {
+    for (let i=0; i< 10; i++) {
         if (signtoolFileExtensions.includes(extension)) {
             if (await signWithSigntool(fileName))
                 return;

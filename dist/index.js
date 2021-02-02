@@ -194,7 +194,7 @@ async function signWithSigntool(fileName) {
 async function trySignFile(fileName) {
     console.log(`Signing ${fileName}.`);
     const extension = path_1.default.extname(fileName);
-    for (let i = 10; i < 20; i++) {
+    for (let i = 0; i < 10; i++) {
         if (signtoolFileExtensions.includes(extension)) {
             if (await signWithSigntool(fileName))
                 return;
