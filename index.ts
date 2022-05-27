@@ -37,53 +37,51 @@ async function createCertificatePfx() {
 
 async function addCertificateToStore(){
     try {
-        const password : string= core.getInput('password');
-        if (password == ''){
+        const password: string = core.getInput('password');
+        if (password == '') {
             console.log("Password is required to add pfx certificate to store");
-            return false; 
+            return false;
         }
-        var command = `certutil -f -p ${password} -importpfx ${certificateFileName}` 
-        console.log("Adding cert to store command: " + command); 
+        const command = `certutil -f -p ${password} -importpfx ${certificateFileName}`
+        console.log(`Adding cert to store command: ${command}`);
         const { stdout } = await asyncExec(command);
         console.log(stdout);
         return true;
-    } catch(err) {
-        console.log(err.stdout);
-        console.log(err.stderr);
+    } catch (err) {
+        console.log(err);
         return false;
     }
 }
 
 async function signWithSigntool(fileName: string) {
     try {
-        // var command = `"${signtool}" sign /sm /t ${timestampUrl} /sha1 "1d7ec06212fdeae92f8d3010ea422ecff2619f5d"  /n "DanaWoo" ${fileName}`
-        var vitalParameterIncluded = false; 
-        var timestampUrl : string = core.getInput('timestampUrl');
+        // var command = `"${signtool}" sign /sm /tr ${timestampUrl} /sha1 "1d7ec06212fdeae92f8d3010ea422ecff2619f5d"  /n "DanaWoo" ${fileName}`
+        let vitalParameterIncluded = false;
+        let timestampUrl: string = core.getInput('timestampUrl');
         if (timestampUrl === '') {
-          timestampUrl = 'http://timestamp.verisign.com/scripts/timstamp.dll'; // 'http://timestamp.digicert.com';//
+          timestampUrl = 'http://timestamp.digicert.com'; // 'http://timestamp.digicert.com';//
         }
-        var command = `"${signtool}" sign /sm /t ${timestampUrl}`
-        const sha1 : string= core.getInput('certificatesha1');
-        if (sha1 != ''){
+        let command = `"${signtool}" sign /sm /tr ${timestampUrl}`
+        const sha1: string = core.getInput('certificatesha1');
+        if (sha1 != '') {
             command = command + ` /sha1 "${sha1}"`
-            vitalParameterIncluded = true; 
+            vitalParameterIncluded = true;
         }
-        const name : string= core.getInput('certificatename');
-        if (name != ''){
-            vitalParameterIncluded = true; 
+        const name : string = core.getInput('certificatename');
+        if (name != '') {
+            vitalParameterIncluded = true;
             command = command + ` /n "${name}"`
         }
-        if (!vitalParameterIncluded){
-            console.log("You need to include a NAME or a SHA1 Hash for the certificate to sign with.")
+        if (!vitalParameterIncluded) {
+            console.log('You need to include a NAME or a SHA1 Hash for the certificate to sign with.')
         }
-        command = command + ` ${fileName}`; 
-        console.log("Signing command: " + command); 
+        command = `${command} ${fileName}`;
+        console.log(`Signing command: ${command}`);
         const { stdout } = await asyncExec(command);
         console.log(stdout);
         return true;
     } catch(err) {
-        console.log(err.stdout);
-        console.log(err.stderr);
+        console.log(err);
         return false;
     }
 }
@@ -91,13 +89,15 @@ async function signWithSigntool(fileName: string) {
 async function trySignFile(fileName: string) {
     console.log(`Signing ${fileName}.`);
     const extension = path.extname(fileName);
-    for (let i=0; i< 10; i++) {
+    for (let i = 0; i < 3; i++) {
         await sleep(i);
         if (signtoolFileExtensions.includes(extension)) {
-            if (await signWithSigntool(fileName))
+            if (await signWithSigntool(fileName)) {
                 return;
+            }
         }
     }
+
     throw `Failed to sign '${fileName}'.`;
 }
 
@@ -108,10 +108,10 @@ async function* getFiles(folder: string, recursive: boolean): any {
         const stat = await fs.stat(fullPath);
         if (stat.isFile()) {
             const extension = path.extname(file);
-            if (signtoolFileExtensions.includes(extension) || extension == '.nupkg')
+            if (signtoolFileExtensions.includes(extension) || extension == '.nupkg') {
                 yield fullPath;
-        }
-        else if (stat.isDirectory() && recursive) {
+            }
+        } else if (stat.isDirectory() && recursive) {
             yield* getFiles(fullPath, recursive);
         }
     }
@@ -129,11 +129,10 @@ async function run() {
     try {
         if (await createCertificatePfx())
         {
-            if (await addCertificateToStore()) 
+            if (await addCertificateToStore())
                 await signFiles();
         }
-    }
-    catch (err) {
+    } catch (err) {
         core.setFailed(`Action failed with error: ${err}`);
     }
 }
