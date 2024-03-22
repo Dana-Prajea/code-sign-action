@@ -1,4 +1,6 @@
-on: push
+on: 
+  push:
+  workflow_dispatch:
 
 name: master
 jobs:
@@ -17,11 +19,16 @@ jobs:
       - name: Run the action with missing certificate
         uses: ./
         with:
-          certificate: '${{ secrets.MISSING_CERTIFICATE }}'
+          certificate: ''
+          recursive: false
           folder: 'files'
       - name: Run the action
         uses: ./
         with:
           certificate: '${{ secrets.CERTIFICATE }}'
+          password: '${{secrets.CERTIFICATE_PASSWORD}}'
+          certificatesha1: '${{secrets.CERTIFICATE_THUMBPRINT}}'
+          certificatename: '${{secrets.CERTIFICATE_NAME}}'
+          timestampUrl: "http://timestamp.digicert.com"
           folder: 'files'
           recursive: true

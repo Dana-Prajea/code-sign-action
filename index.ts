@@ -48,8 +48,8 @@ async function addCertificateToStore(){
         console.log(stdout);
         return true;
     } catch(err) {
-        console.log(err.stdout);
-        console.log(err.stderr);
+        console.log((err as any).stdout);
+        console.log((err as any).stderr);
         return false;
     }
 }
@@ -82,8 +82,8 @@ async function signWithSigntool(fileName: string) {
         console.log(stdout);
         return true;
     } catch(err) {
-        console.log(err.stdout);
-        console.log(err.stderr);
+        console.log((err as any).stdout);
+        console.log((err as any).stderr);
         return false;
     }
 }
